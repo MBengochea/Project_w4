@@ -1,8 +1,29 @@
 import streamlit as st
 import pandas as pd
+import requests
+import xml.etree.ElementTree as ET
 
 # --- Load your dataset ---
 boardgames_df = pd.read_csv("boardgames_df_cleaned.csv")
+
+# --- Image Fetcher using BoardGameGeek XML API ---
+def fetch_bgg_image(game_name):
+    search_url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"
+    try:
+        search_response = requests.get(search_url)
+        root = ET.fromstring(search_response.content)
+        first_item = root.find("item")
+        if first_item is not None:
+            game_id = first_item.attrib["id"]
+            thing_url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}&stats=1"
+            thing_response = requests.get(thing_url)
+            thing_root = ET.fromstring(thing_response.content)
+            image_tag = thing_root.find(".//image")
+            if image_tag is not None:
+                return image_tag.text
+    except Exception as e:
+        print(f"Error fetching image for {game_name}: {e}")
+    return None
 
 # --- Streamlit UI ---
 st.title("🎲 Board Game Recommender")
@@ -33,4 +54,12 @@ if filtered_df_ranked.empty:
     st.warning("⚠️ No games match all criteria. Try relaxing one or more inputs.")
 else:
     st.subheader("🔥 Top 5 Matching Games")
-    st.dataframe(filtered_df_ranked[['boardgame', 'avg_rating', 'min_players', 'max_players', 'min_playtime', 'max_playtime', 'minimum_age', 'complexity']].head(5))
+    for _, row in filtered_df_ranked.head(5).iterrows():
+        st.markdown(f"### {row['boardgame']}")
+        st.write(f"⭐ Rating: {row['avg_rating']} | 👥 Players: {row['min_players']}–{row['max_players']} | ⏱️ Playtime: {row['min_playtime']}–{row['max_playtime']} mins | 🧠 Complexity: {row['complexity']}")
+        img_url = fetch_bgg_image(row['boardgame'])
+        if img_url:
+            st.image(img_url, width=250)
+        else:
+            st.info("No image found.")
+
