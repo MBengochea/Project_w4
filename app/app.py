@@ -2,9 +2,16 @@ import streamlit as st
 import pandas as pd
 import requests
 import xml.etree.ElementTree as ET
+import yaml
+
+try:
+    with open("../config.yaml", "r") as file:
+        config = yaml.safe_load(file)
+except:
+    print("Yaml configuration file not found!")
 
 # --- Load your dataset ---
-boardgames_df = pd.read_csv("boardgames_df_cleaned.csv")
+boardgames_df = pd.read_csv(config['output_data']['file'])
 
 # --- Image Fetcher using BoardGameGeek XML API ---
 def fetch_bgg_image(game_name):
@@ -32,7 +39,11 @@ st.write("Find the best board games for your session based on your preferences."
 # --- User Inputs ---
 playtime = st.slider("⏱️ Desired playtime (minutes)", 0, 1200, 30)
 number_players = st.slider("👥 Number of players", 1, 100, 2)
+<<<<<<< HEAD
 min_age = st.slider("🧒 Age of youngest player", 0, 18)
+=======
+min_age = st.slider("🧒 Age of youngest player", 4, 18, 12)
+>>>>>>> ebfb4270c10172201f2fd1cd15f2bf350db49104
 difficulty_level = st.selectbox("🧠 Desired difficulty level", [1, 2, 3, 4], format_func=lambda x: ["Easy", "Medium", "Hard", "Very Hard"][x-1])
 complexity = float(difficulty_level)
 
@@ -42,7 +53,7 @@ filtered_df = boardgames_df[
     (boardgames_df['max_playtime'] >= playtime) &
     (boardgames_df['min_players'] <= number_players) &
     (boardgames_df['max_players'] >= number_players) &
-    (boardgames_df['minimum_age'] >= min_age) &
+    (boardgames_df['minimum_age'] <= min_age) &
     (boardgames_df['complexity'] <= complexity + 1) &
     (boardgames_df['complexity'] >= complexity)
 ]
