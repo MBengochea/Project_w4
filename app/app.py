@@ -2,9 +2,16 @@ import streamlit as st
 import pandas as pd
 import requests
 import xml.etree.ElementTree as ET
+import yaml
+
+try:
+    with open("../config.yaml", "r") as file:
+        config = yaml.safe_load(file)
+except:
+    print("Yaml configuration file not found!")
 
 # --- Load your dataset ---
-boardgames_df = pd.read_csv("../data/clean/boardgames_df_cleaned.csv")
+boardgames_df = pd.read_csv(config['output_data']['file'])
 
 # --- Image Fetcher using BoardGameGeek XML API ---
 def fetch_bgg_image(game_name):
