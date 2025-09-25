@@ -39,6 +39,7 @@ st.write("Find the best board games for your session based on your preferences."
 # --- User Inputs ---
 playtime = st.slider("⏱️ Desired playtime (minutes)", 0, 1200, 30)
 number_players = st.slider("👥 Number of players", 1, 100, 2)
+min_age = st.slider("🧒 Age of youngest player", 0, 18)
 min_age = st.slider("🧒 Age of youngest player", 4, 18, 12)
 difficulty_level = st.selectbox("🧠 Desired difficulty level", [1, 2, 3, 4], format_func=lambda x: ["Easy", "Medium", "Hard", "Very Hard"][x-1])
 complexity = float(difficulty_level)
